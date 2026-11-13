@@ -35,7 +35,11 @@ Akida Pico is an ultra-low-power, event-based neural IP for always-on 1-D sensin
 | Wake word | Continuous 16-bit audio | Interrupt to host | False accepts < 1 per hour; false rejects < 5% | No dedicated model |
 | Health monitoring | Multi-channel biosignal | Continuous estimate | RMSE < 1 on BIDMC | Research model on BIDMC; not in the zoo |
 
-**Reference result.** On the Pico FPGA at 50 MHz, the 12-class KWS model runs real time at about 64 µW duty-cycled (about 1 µJ per inference) with roughly 95% accuracy on Speech Commands. The power figure is an estimate from Pico hardware characterization (22 nm, 5% switching activity), not a measurement on the FPGA.
+**Reference result.** On the Pico FPGA at 50 MHz, the 12-class KWS model runs real time at about 64 µW duty-cycled (about 1 µJ per inference) with roughly 95% accuracy on Speech Commands. The power figure is an estimate from Pico hardware characterization (22 nm, 5% switching activity), not a measurement on the FPGA. The figure below splits it into 50 µW average active power and 14 µW leakage, for a core of 160K gates and 74K SRAM. At that average the slide puts continuous always-on KWS at about 391 days on a 600 mAh, 1 V battery.
+
+![Always-on KWS Pico core power: 64 µW total, made of 50 µW average active power and 14 µW leakage, at 22 nm and 50 MHz](figs/pico_kws_core_power.png)
+
+*Source: BrainChip Pico power and performance slide, dated 2026-04-02. The slide marks all numbers as estimates and notes that leakage depends on the libraries used. It does not state the unit for the SRAM figure.*
 
 ## Recurrent TENN concepts
 
@@ -91,7 +95,7 @@ Both start with a `Rescaling` layer that divides the int16 input by 2^15, so the
 | Quantized, 8-bit stateful | 94.01% | 95.93% | 0.9450 |
 | Akida (mapped) | 94.01% | 95.91% | 0.9420 |
 
-SC12 is scored per 1-second clip by averaging the 64 per-chunk logits. UORED is scored per roughly 1-second segment (41,984 samples, 164 chunks).
+SC12 is scored per 1-second clip by averaging the 64 per-chunk logits. UORED is scored per roughly 1-second segment (41,984 samples, 164 chunks). The UORED test set is 240 segments from 8 held-out bearings: 40 each of inner race, outer race, ball and cage faults, and 80 healthy. The model has 16,564 int8 parameters (16.2 KB).
 
 **Getting a model out of the zoo.**
 
@@ -142,7 +146,7 @@ You can change channels, depth, subsampling, state size and input shape, but the
 | Output without ReLU | Last layer only | 2024 hardware specification |
 | Compute and memory | 32 MACs per clock; whole model in on-chip SRAM | Design intent; SRAM size still to be set by sales and marketing |
 
-The 2024 specification is the legacy design baseline. Newer mapping checks have since relaxed or corrected some of its rules (for example the input-channel rule), so where the two disagree, believe the mapping error and report the discrepancy.
+The 2024 specification is the legacy design baseline. Newer mapping checks have since relaxed or corrected some of its rules (for example the input-channel rule), so where the two disagree, believe the mapping error and report the discrepancy. One case to watch: a current BrainChip slide describes Pico-compatible models as int8 weights and activations with int16 input and no Conv2D or Dense layers, while the 2024 specification still lists dense layers. Treat dense layers as unconfirmed.
 
 **Design rules that follow**
 
@@ -281,6 +285,12 @@ For KWS this gives about 64 µW average and about 1 µJ per inference, and the a
 
 These constants (550 µW at 50 MHz, 14 µW leakage) come from Pico hardware characterization at 22 nm and 5% switching activity. They are an estimate, not an FPGA measurement; hardware benchmarks are a separate open ticket (HUB-23).
 
+**Cross-check on the fault-detection model.** The same model reproduces the figures on BrainChip's UORED slide. At 50 MHz the mapped model takes 1.29 ms per 256-sample chunk (about 64,500 cycles), which is about 775 chunks per second against the 164 needed at 42 kHz. The chunk period is 6.1 ms, so the duty cycle is 1.29 ÷ 6.1 = 21%, and the average power is 564 µW × 0.21 + 14 µW × 0.79 ≈ 130 µW, or about 0.79 µJ per decision. On the slide, latency and throughput are measured at 50 MHz; power and energy are estimated for Pico at 22 nm.
+
+![Bearing fault detection on Akida Pico: four stateful SSM blocks plus a head, 0.9420 macro AUROC int8, 1.29 ms per chunk, about 775 FPS, about 130 µW average power, 16.2 KB](figs/uored_fault_detection_pico.png)
+
+*Source: BrainChip TENNs-R bearing fault detection slide. It lists the model as int8 weights and activations with int16 input, trained on 8,192-sample windows and scored on 41,984-sample decisions.*
+
 **Streaming inference.** In deployment you feed chunks continuously and never buffer the whole clip.
 
 1. Zero-pad the stream to a multiple of the chunk size.
@@ -349,8 +359,12 @@ This draft was assembled from documents and code, not from a fresh run of the pi
 - [ ] **Release approval.** The PRD requires permission from Tony Lewis and Steve Brightfield before the recurrent TENN layer source is public; otherwise it goes out under NDA. Confirm this guide can describe the layer internals externally.
 - [ ] **Internal references.** Jira ticket keys are cited so reviewers can trace claims. Remove them, and anything that implies internal repositories, before external release. Models built on client data must never be named or published.
 - [ ] **Hardware limits.** The limits table mixes current mapping checks with the 2024 specification. Confirm each row against the current MetaTF hardware-constraints page.
-- [ ] **SRAM budget.** The maximum model size is still set by sales and marketing. Add it when known.
+- [ ] **SRAM budget.** The maximum model size is still to be set by sales and marketing. The KWS power slide lists 74K SRAM for the reference core without a unit; confirm the unit and whether it is the limit.
 - [ ] **Power numbers.** The 64 µW and 1 µJ figures are characterization estimates. The Pico example ticket says not to estimate hardware numbers until FPGA benchmarks land (HUB-23). Decide which wording ships.
+- [ ] **Energy per inference.** This guide says about 1 µJ for KWS (the notebook model computes to 1.02 µJ). A comparison slide shows about 0.8 µJ for Pico and 1.07 µJ for Autonomous Pico. Align the figure and say which configuration it describes.
+- [ ] **UORED accuracy.** The fault-detection slide reports 0.9420 macro AUROC for the int8 model and calls it identical to float. The engineering ticket shows 0.9486 for the float stateful model and 0.9420 on Akida. Confirm which float figure to quote.
+- [ ] **Dense layers.** The 2024 specification lists them; a current slide says Pico-compatible models have none. Confirm against the mapping checks.
+- [ ] **Figures.** The two slides embedded here are internal BrainChip slides, and the KWS power slide is marked Confidential. Confirm they can be published, or redraw them.
 - [ ] **KWS latency target.** The PRD says under 100 ms; the research executive summary says under 250 ms. Pick one.
 - [ ] **Headline accuracy.** Repository text says about 95%; the published pretrained model evaluated at 93.80% and runs range from 93% to 96%. Pick one honest figure.
 - [ ] **Versions.** `requirements.txt` pins `akida ~= 2.19.2`; the cloud specification lists 2.19.1; the example ticket pins 2.19.3. Align them.

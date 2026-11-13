@@ -96,7 +96,7 @@ The model wants fixed-length int16 windows of shape `(N, window, channels)`, a l
 | Window | 16,384 samples; shorter clips zero-padded, longer cropped | Non-overlapping windows of the model length (8,192) |
 | Scaling | Waveform kept in int16 range | Each recording divided by its own peak, then multiplied by 2^15 − 1 |
 | Labels | Integer 0 to 11 | Four 0/1 labels per recording, repeated for every window |
-| Split | Dataset's own train and test sets | Bearing-wise: `split_000.json` lists train and test bearing IDs |
+| Split | Dataset's own train and test sets | Bearing-wise: `split_000.json` lists train and test bearing IDs; 20 bearings, 8 held out (2 per fault type) |
 | Balancing | Equal samples per class per epoch (3,100) | None |
 | Augmentation | None in the integrated recipe | Random gain, normal with mean 1.0 and standard deviation 0.7, clipped to int16 |
 

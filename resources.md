@@ -54,13 +54,22 @@ I also ran a Jira text search for "pico" and read the key and title of about 50 
 | TENNs Cookbook, project `1208513746520582` (five tasks, via search) | Titles and notes only | Context for the cookbook and licensing effort | TFG |
 | [Migrate Model interactive Guide to Developer Model page](https://app.asana.com/1/754105566748081/project/1209897724395513/task/1210828912026166) | Yes | Context only; no content used | Neither |
 
-## 6. Searched but not opened
+## 6. Slides supplied by the author (`figs/`)
+
+| Slide | Status | Used for |
+| --- | --- | --- |
+| Always-On KWS Pico Core Power, dated 2026-04-02 (`figs/pico_kws_core_power.png`) | Embedded in the Model Development Guide | The 64 µW breakdown (50 µW active average plus 14 µW leakage), core size, battery life. It confirms the power model in the guide. |
+| TENNs-R Bearing Fault Detection (`figs/uored_fault_detection_pico.png`) | Embedded in the Model Development Guide | Measured latency and throughput at 50 MHz, estimated power and energy, 16,564 parameters, the 240-segment test set. Its numbers reproduce from the guide's power model. |
+| A slide built on private client data | Not used and not committed | Excluded because models built on client data must never be published (HUB-3). The file is listed in `.gitignore`. |
+| Pico vs. Syntiant vs. Akida 1 IP comparison | Not used and not committed | Competitor figures are third-party claims and a marketing decision. Its energy figure for Pico (about 0.8 µJ) differs from the guide's (about 1 µJ) and is flagged as an open item. |
+
+## 7. Searched but not opened
 
 SharePoint search surfaced these. I did not open them and took nothing from them: Akida Pico datasheets and product briefs, the Pico FPGA cloud product brief, the Pico PRD in the `Obsolete` folder, the Akida Pico Autonomous Mode PRD, the Sequora PRDs and decks, the Analog Devices workshop deck, and the TENNs Model matrix spreadsheet.
 
 If the guides are reworked, the datasheet, the FPGA cloud brief and the TENNs Model matrix are the first places to check for hardware and model details I did not see.
 
-## 7. Could not access or not fetched
+## 8. Could not access or not fetched
 
 | Resource | Status |
 | --- | --- |
@@ -69,7 +78,7 @@ If the guides are reworked, the datasheet, the FPGA cloud brief and the TENNs Mo
 | [MetaTF documentation](https://doc.brainchipinc.com/index.html) | Linked in the guides but not fetched, so hardware-constraint statements were not checked against it |
 | Slack, Google Drive, Notion and other connectors listed as needing authorization | Not authorized in this session, not searched |
 
-## 8. Corrections made while writing
+## 9. Corrections made while writing
 
 Claims I checked against the sources and changed:
 
