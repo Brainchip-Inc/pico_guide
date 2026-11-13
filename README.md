@@ -10,8 +10,11 @@ Draft guides for building, training and fine-tuning models for **BrainChip Akida
 | --- | --- |
 | [Akida_Pico_Model_Development_Guide.md](Akida_Pico_Model_Development_Guide.md) | From a trained 1-D model to a quantized network running on Pico: recurrent TENN concepts, the two zoo models, design rules and hardware limits, the convert-quantize-map workflow, validation, on-device measurement, application status, troubleshooting. |
 | [Akida_Pico_Model_Training_and_Fine-Tuning_Guide.md](Akida_Pico_Model_Training_and_Fine-Tuning_Guide.md) | How to get trained weights: environment, data preparation, training from scratch, fine-tuning, evaluation and reproducibility, post-training steps, architecture changes, anomaly detection notes, troubleshooting. |
-| [figs/](figs/) | Slides embedded in the Model Development Guide: KWS core power and bearing fault detection results. |
+| [customer/](customer/) | Customer editions, with internal references and reviewer checklists removed: the two guides above, and [Customizing_the_Akida_Pico_KWS_Model.md](customer/Customizing_the_Akida_Pico_KWS_Model.md), a short path for adapting the Pico KWS model to your own keywords. |
+| [figs/](figs/) | Slides embedded in the guides: KWS core power (internal edition only) and bearing fault detection results. |
 | [resources.md](resources.md) | Every source used to write the guides, what was taken from each, what was only seen in search results, and what could not be accessed. |
+
+**Internal drafts and customer editions.** The two guides in the repository root are internal review drafts. They cite internal tickets and documents and end with open-item checklists. Anything intended for customers should come from `customer/`, which has none of that.
 
 ## How to read them
 
